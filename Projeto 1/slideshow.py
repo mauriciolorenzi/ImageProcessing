@@ -24,22 +24,22 @@ def AddBorder(image):
 def AddWaterMark(image):
     waterMarkImage = cv2.imread(WATER_MARK_PATH)
 
-    # This point represent the height point
-    xInit = image.shape[0] - BORDER_SIZE - waterMarkImage.shape[0]
-    xEnd = image.shape[0] - BORDER_SIZE
-
     # This point represent the width point
-    yInit = BORDER_SIZE
-    yEnd = waterMarkImage.shape[1] + BORDER_SIZE
+    xInit = BORDER_SIZE
+    xEnd = waterMarkImage.shape[1] + BORDER_SIZE
+
+    # This point represent the height point
+    yInit = image.shape[0] - BORDER_SIZE - waterMarkImage.shape[0]
+    yEnd = image.shape[0] - BORDER_SIZE
 
     # Getting a region of interest
-    roi = image[xInit:xEnd, yInit:yEnd]
+    roi = image[yInit:yEnd, xInit:xEnd]
   
     # Adding alpha to the roi and the water mark image
     roi = cv2.addWeighted(roi, 0.5, waterMarkImage, 0.5, 0)
     
     # Putting the roi image over the original slide image
-    image[xInit:xEnd, yInit:yEnd] = roi
+    image[yInit:yEnd, xInit:xEnd] = roi
     
     return image
 
