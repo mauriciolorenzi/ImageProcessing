@@ -1,3 +1,5 @@
+#Mauricio Luis de Lorenzi RA: 141269
+
 import cv2
 import os
 import numpy
