@@ -21,7 +21,9 @@ DATA = numpy.array(
 
 kernel = numpy.ones((3,3), numpy.uint8)
 
-erode  = cv2.erode(DATA, kernel)    
+erode  = cv2.erode(DATA, kernel, iterations=2)
+
+erode[0,:] = erode[:,0] = erode[:,-1] =  erode[-1,:] = 0
 
 pprint.pprint(DATA)
 print("\n")
