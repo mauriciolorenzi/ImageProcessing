@@ -22,6 +22,7 @@ def AddBorder(image):
 
 # Add a water mark into the image
 def AddWaterMark(image):
+    # Loading the water mark  
     waterMarkImage = cv2.imread(WATER_MARK_PATH)
 
     # This point represent the width point
