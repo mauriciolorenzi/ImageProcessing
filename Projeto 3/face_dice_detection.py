@@ -2,53 +2,70 @@ import cv2
 import numpy
 
 KERNEL = numpy.ones((10,10),numpy.uint8)
+FACE_BALLS_NUMBER = 0
+FONT = cv2.FONT_HERSHEY_SIMPLEX
+FONT_SIZE = 1
+FONT_COLOR = (0, 0, 255)
+FONT_SCALE = 2
+LINE_TYPE = cv2.LINE_AA
 
+# Get the dices image
 dices = cv2.imread('dados.jpg', cv2.IMREAD_COLOR)
 
+# Copy the image
 dices_bgr = dices.copy()
 
+# Convert the BGR dices image to YUV format
 dices_yuv = cv2.cvtColor(dices_bgr, cv2.COLOR_BGR2YUV)
 
-# equalize the histogram of the Y channel
+# Equalize the histogram of the Y channel
 dices_yuv[:,:,0] = cv2.equalizeHist(dices_yuv[:,:,0])
 
-# convert the YUV image back to RGB format
+# Convert the YUV dices image back to BGR format
 dices_bgr = cv2.cvtColor(dices_yuv, cv2.COLOR_YUV2BGR)
 
-dices_bgr = cv2.cvtColor(dices_bgr, cv2.COLOR_BGR2GRAY)
+# Convert the BGR dices image to GRAY format
+dices_gray = cv2.cvtColor(dices_bgr, cv2.COLOR_BGR2GRAY)
 
-_,thresh = cv2.threshold(dices_bgr, 127, 255, cv2.THRESH_BINARY_INV)
+# Do the binary inversion of the gray format image
+_,thresh = cv2.threshold(dices_gray, 127, 255, cv2.THRESH_BINARY_INV)
 
+# Apply Opening morphological transformation (erosion followed by dilation) to remove all noises of the image
 thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, KERNEL)
 
-#dices = cv2.bitwise_not(dices)
-
+# Find the contours (dices' faces)
 contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-height, width = dices_bgr.shape
-min_x, min_y  = width, height
-max_x = max_y = 0
-
-# Set up the detector with default parameters.
+# Set up the detector with default parameters
 detector = cv2.SimpleBlobDetector_create()
- 
-# Detect blobs.
-keypoints = detector.detect(dices)
 
-# computes the bounding box for the contour, and draws it on the frame,
+# Computes the bounding box for the contour
 for contour in contours :
-"""    (x,y,w,h) = cv2.boundingRect(contour)
-    min_x, max_x = min(x, min_x), max(x+w, max_x)
-    min_y, max_y = min(y, min_y), max(y+h, max_y)
-    cv2.rectangle(dices, (x,y), (x+w,y+h), (0,0,255), 1)"""
-    for marker in keypoints:
-        #center
-"""        x,y = numpy.int(marker.pt[0]),numpy.int(marker.pt[1])
-        pos = numpy.int(marker.size / 2)
-        cv2.circle(dices,(x,y),3,255,-1)
-        cv2.rectangle(dices,(x-pos,y-pos),(x+pos,y+pos),0,1)"""
+        # Get the respective x and y of start and end point
+        (x,y,w,h) = cv2.boundingRect(contour)
+        
+        # Get the only the dice's face image
+        roi = dices[y : y + h, x : x + w].copy()
 
+        # Get the keypoints
+        keypoints = detector.detect(roi)
+
+        # Count the number of face's balls
+        for marker in keypoints:
+                # Increment the number of balls found in dices' face                                
+                FACE_BALLS_NUMBER += 1
+
+                # X start position of the number
+                numberX = int(x + (w / 2))
+
+                # Y start position of the number
+                numberY = int(y + (h / 2))
+
+        # Print the number of balls on the right face
+        cv2.putText(dices, str(FACE_BALLS_NUMBER), (numberX, numberY) , FONT, FONT_SIZE, FONT_COLOR, FONT_SCALE, LINE_TYPE)
+        # Restart the count of a face's number 
+        FACE_BALLS_NUMBER = 0
     
-cv2.imshow("Blobs = "+ str(len(keypoints)), dices)
+cv2.imshow("dices with numbered faces", dices)
 cv2.waitKey()
 cv2.destroyAllWindows()
