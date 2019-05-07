@@ -24,24 +24,17 @@ def DetectDiceFaceNumber(dices):
         # Copy the image
         dices_bgr = dices.copy()
 
-        # Convert the BGR dices image to YUV format
-        dices_yuv = cv2.cvtColor(dices_bgr, cv2.COLOR_BGR2YUV)
-
-        # Equalize the histogram of the Y channel
-        dices_yuv[:,:,0] = cv2.equalizeHist(dices_yuv[:,:,0])
-
-        # Convert the YUV dices image back to BGR format
-        dices_bgr = cv2.cvtColor(dices_yuv, cv2.COLOR_YUV2BGR)
-
         # Convert the BGR dices image to GRAY format
         dices_gray = cv2.cvtColor(dices_bgr, cv2.COLOR_BGR2GRAY)
 
-        # Do the binary inversion of the gray format image
-        _,thresh = cv2.threshold(dices_gray, 127, 255, cv2.THRESH_BINARY_INV)
+        # Do the binarization of the gray format image
+        _,thresh = cv2.threshold(dices_gray, 127, 255, cv2.THRESH_BINARY)
+        #_,thresh = cv2.threshold(dices_bgr, 127, 0, cv2.THRESH_BINARY_INV)
 
         # Apply Opening morphological transformation (erosion followed by dilation) to remove all noises of the image
-        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, KERNEL)
-
+        #thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, KERNEL)
+        cv2.imshow("roi", thresh)
+      
         # Find the contours (dices' faces)
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -53,7 +46,7 @@ def DetectDiceFaceNumber(dices):
                 # Get the respective x and y of start and end point
                 (x,y,w,h) = cv2.boundingRect(contour)
                 
-                # Get the only the dice's face image
+                # Get only the dice's face image
                 roi = dices[y : y + h, x : x + w].copy()
 
                 # Get the keypoints
@@ -65,9 +58,11 @@ def DetectDiceFaceNumber(dices):
                         FACE_BALLS_NUMBER += 1
 
                         # X start position of the number
+                        #numberX = int(x + (w / 2))
                         numberX = int(x + (w / 2))
 
                         # Y start position of the number
+                        #numberY = int(y + (h / 2))
                         numberY = int(y + (h / 2))
 
                 # Print the number of balls on the right face
@@ -79,13 +74,13 @@ def DetectDiceFaceNumber(dices):
 
 while DICES_VIDEO.isOpened() :        
         ret, frame = DICES_VIDEO.read()
-        COUNT += 1
+        #COUNT += 1
 
-        if COUNT == 15:
-                COUNT = 0
-                DetectDiceFaceNumber(frame)
-        else:
-                cv2.imshow("dices with numbered faces", frame) 
+        #if COUNT == 10:
+         #       COUNT = 0
+        DetectDiceFaceNumber(frame)
+        #else:
+        cv2.imshow("dices with numbered faces", frame) 
 
         if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
