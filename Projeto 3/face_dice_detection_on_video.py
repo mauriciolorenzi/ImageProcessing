@@ -32,7 +32,7 @@ def DetectDiceFaceNumber(dices):
         #_,thresh = cv2.threshold(dices_bgr, 127, 0, cv2.THRESH_BINARY_INV)
 
         # Apply Opening morphological transformation (erosion followed by dilation) to remove all noises of the image
-        #thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, KERNEL)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, KERNEL)
         cv2.imshow("roi", thresh)
       
         # Find the contours (dices' faces)
